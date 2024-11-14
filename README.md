@@ -37,7 +37,7 @@ Student Project from **Python Advanced**, HS24
     - in the terminal (``CLI``)
   - Implementation of a bot (competition at the end of the semester)
 - Hand In: 
-  - **Due Date: SW13 12.12.24**
+  - **Due Date: SW13 - Sunday 15.12.24**
   - Source Code
   - A 4-5 minute video about the project:
     - Overview
