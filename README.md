@@ -1,4 +1,5 @@
 # Raspi Connect 4
+
 Student Project from **Python Advanced**, HS24
 
 
@@ -26,27 +27,43 @@ Student Project from **Python Advanced**, HS24
 
 
 ## Administrative Information
-- Project as a semester performance (40%)
+- Project as a semester performance
+  - Counts ``40%`` to your final grade
 - Teams of two
-- Game modes:
-  - **Local** on the PC 
-    - On the Raspberry Pi (``SenseHat``)
-    - in the terminal (``CLI``)
-  - **Remote**: Over the network via REST API and Flask web server 
-    - On the Raspberry Pi (``SenseHat``)
-    - in the terminal (``CLI``)
-  - Implementation of a bot (competition at the end of the semester)
-- Hand In: 
-  - **Due Date: SW13 - Sunday 15.12.24**
-  - Source Code
-  - A 4-5 minute video about the project:
-    - Overview
-    - Difficulties / Highlights, etc.
-    - Demo
+- **Due Date: SW13 - Sunday 15.12.24**
+
+**Goals of the Game:**
+
+- Game mode ``Levels`` to achieve:
+  - **``Level 1``: Local** on the PC (2 player on 1 PC)
+  - **``Level 2``: Local** on the Raspberry Pi (2 players on 1 Raspi)
+  - **``Level 3``: Remote** with 2 PCs (2 players on 2 PCs)
+  - **``Level 4``: Remote** with 2 RaspberryPis (2 players on 2 Raspis)
+  - **``Level 5``: Remote** with 1 Raspi and 1 PC (1 player on each device)
+  - **``optional``:** Implementation of a ``bot`` for autonomous Remote Play 
+    - competition at the end of the semester (`SW14`)
+
+
+**Hand In:**  
+  - **Source Code**:
+    - Hand in your source code as a `.zip` file
+    - **Grading Criteria of the Code:**
+      - Object - Oriented Programming Style (`OOP`)
+      - Good Documentation:
+        - Correct ``Docstrings``
+        - Correct ``TypeHints``
+      - Highest **working** project `level`
+  - **Video Presentation:** A 4-5 minute video about the project including:
+    - **Overview**: 
+      - Short description of **highest working `level`** of the Connect4 project
+    - **Difficulties / Highlights**:
+      - What did not work 
+      - What are you proud of
+    - **Demo**: Show us that is indeed working
 
 
 ### RaspberryPi
-The raspberry pi will be collected **after the MEP**. If someone does not attend the MEP, please hand your RaspberryPi back in `SW14`.
+The RaspberryPi will be collected **after the MEP**. If someone does not attend the MEP, please hand your RaspberryPi back in `SW14`.
 
 **Failure to return the RaspberryPi will result in an `F`** in this module.
 
