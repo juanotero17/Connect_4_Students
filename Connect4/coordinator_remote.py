@@ -17,14 +17,12 @@ class Coordinator_Remote:
         sense (SenseHat):   Optional Local Instance of a SenseHat (if on Raspi)
     """
 
-    def __init__(self, api_url: str, on_raspi: bool) -> None:
+    def __init__(self, api_url: str) -> None:
         """
         Initialize the Coordinator_Remote.
 
         Parameters:
             api_url (str):      Address of Server, including Port Bsp: http://10.147.17.27:5000
-            on_raspi (bool):    Indicates whether the game is running on a Raspberry Pi.
-                                If True, initializes a Raspberry Pi player; otherwise, a regular player.
         """
         self.api_url = api_url
 
