@@ -140,7 +140,7 @@ This class contains the essential game logic:
 
 The **`Player`** classes implement certain **abstract methods** to manage the gameplay flow, whether local or remote. The key methods include:
 
-- **`make_move`**: Allows the player to select a column to drop a coin.
+- **`check_move`**: Allows the player to select a column to drop a coin.
 - **`visualize`**: Visualizes the current board state.
 - **`register_in_game`**: Registers the player in the game.
 - **`get_game_status`**: Retrieves the current game status.
@@ -193,8 +193,8 @@ The **four API endpoints** are:
     - `X`: Position of Player `X`
     - `O`: Position of Player `O`
   
-2. **`/connect4/make_move`** (POST): Validates a move and updates the board if the move is legal.
-  - Wraps `make_move()`
+2. **`/connect4/check_move`** (POST): Validates a move and updates the board if the move is legal.
+  - Wraps `check_move()`
   - Takes Message Body of `"column","player_id"`
 
 These endpoints allow remote players to interact with the **`Connect4`** game instance running on the server. 

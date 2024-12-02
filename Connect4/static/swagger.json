@@ -114,7 +114,7 @@
           }
         }
       },
-      "/connect4/make_move": {
+      "/connect4/check_move": {
         "post": {
           "tags": ["connect4"],
           "summary": "Check a Move, if legal, make it",

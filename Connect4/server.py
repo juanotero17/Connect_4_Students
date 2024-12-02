@@ -81,8 +81,8 @@ class Connect4Server:
             pass
 
         # 4. Expose move method
-        @self.app.route('/connect4/make_move', methods=['POST'])
-        def make_move():
+        @self.app.route('/connect4/check_move', methods=['POST'])
+        def check_move():
             # TODO: make move and return success if made
             pass
 
