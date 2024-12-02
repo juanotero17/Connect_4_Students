@@ -170,15 +170,15 @@ The **four API endpoints** are:
 "active_id",
 "winner",
 "turn_number"`
-  - `turn_number` = `-1` means that the game has **not begun yet** (less than 2 players)
+    - `turn_number` = `-1` means that the game has **not begun yet** (less than 2 players)
 
 
-2. **`/connect4/register`** (POST): Registers a player in the game.
+1. **`/connect4/register`** (POST): Registers a player in the game.
   - Wraps `register_player()` 
   - Takes Message Body of: `"player_id"`
   - Returns `"player_icon"`
 
-3. **`/connect4/board`** (GET): Returns the current board state.
+2. **`/connect4/board`** (GET): Returns the current board state.
   - Wraps `get_board()` 
   - Returns a `board` as a **List of Strings**
   - Has 56 entries (7 rows x 8 columns)
@@ -188,7 +188,7 @@ The **four API endpoints** are:
     - `X`: Position of Player `X`
     - `O`: Position of Player `O`
   
-4. **`/connect4/make_move`** (POST): Validates a move and updates the board if the move is legal.
+3. **`/connect4/make_move`** (POST): Validates a move and updates the board if the move is legal.
   - Wraps `make_move()`
   - Takes Message Body of `"column","player_id"`
 
