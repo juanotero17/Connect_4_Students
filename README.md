@@ -14,6 +14,8 @@ Student Project from **Python Advanced**, HS24
     - [Players](#players)
     - [Player Types](#player-types)
     - [Server](#server)
+      - [SWAGGER Documentation](#swagger-documentation)
+      - [Manual API Endpoints description](#manual-api-endpoints-description)
     - [Local Interactions](#local-interactions)
     - [Remote Interaction](#remote-interaction)
   - [Play the Game](#play-the-game)
@@ -149,17 +151,48 @@ The **`Player`** classes implement certain **abstract methods** to manage the ga
 - **`SenseHat Player`**: Input is handled through the SenseHat joystick module, and the board state is displayed on the LED matrix of the SenseHat.
 
 ### Server
-The **`Connect4Server`** exposes the game logic to remote players through four API endpoints:
+The **`Connect4Server`** exposes the game logic to remote players through **four API endpoints**. These API Endpoints are described in both in the **[normal documentation](#manual-api-endpoints-description) AND** in their already existing **[SWAGGER Documentation](#swagger-documentation)**. 
 
-1. **`/connect4/status`** (GET): Returns the current game status.
-2. **`/connect4/register`** (POST): Registers a player in the game.
-3. **`/connect4/board`** (GET): Returns the current board state.
-4. **`/connect4/check_move`** (POST): Validates a move and updates the board if the move is legal.
-
-These endpoints allow remote players to interact with the **`Connect4`** game instance running on the server. The API is documented using Swagger, available at:  
-[http://127.0.0.1:5000/swagger/connect4/](http://127.0.0.1:5000/swagger/connect4/)
+#### SWAGGER Documentation
+To access the SWAGGER Documentation:
+1. Start the server (`python server.py`)
+2. go to [http://localhost:5000/swagger/connect4/](http://localhost:5000/swagger/connect4/)
+3. Inspect the following Swagger Documentation:
 
 ![swagger_api](./imgs/swagger_api.PNG)
+
+#### Manual API Endpoints description
+The **four API endpoints** are:
+
+1. **`/connect4/status`** (GET): Returns the current game status.
+   - Wraps `get_game_state()`
+   - Returns : `"active_player",
+"active_id",
+"winner",
+"turn_number"`
+  - `turn_number` = `-1` means that the game has **not begun yet** (less than 2 players)
+
+
+2. **`/connect4/register`** (POST): Registers a player in the game.
+  - Wraps `register_player()` 
+  - Takes Message Body of: `"player_id"`
+  - Returns `"player_icon"`
+
+3. **`/connect4/board`** (GET): Returns the current board state.
+  - Wraps `get_board()` 
+  - Returns a `board` as a **List of Strings**
+  - Has 56 entries (7 rows x 8 columns)
+  - First entry is the **top left corner** of the board, followed by each entry (row by row)
+  - Entries of the Board are:
+    - ` `: No Entry
+    - `X`: Position of Player `X`
+    - `O`: Position of Player `O`
+  
+4. **`/connect4/make_move`** (POST): Validates a move and updates the board if the move is legal.
+  - Wraps `make_move()`
+  - Takes Message Body of `"column","player_id"`
+
+These endpoints allow remote players to interact with the **`Connect4`** game instance running on the server. 
 
 ### Local Interactions
 In a local game (2 players on the same device), the interaction between the classes is as follows:

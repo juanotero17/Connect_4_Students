@@ -37,6 +37,9 @@
                   },
                   "winner": {
                     "type": "string"
+                  },
+                  "turn_number": {
+                    "type": "integer"
                   }
                 }
               }
