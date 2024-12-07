@@ -3,12 +3,12 @@ from player import Player
 
 
 class Player_Local(Player):
-    """ 
+    """
     Local Player (uses Methods of the Game directly).
     """
 
     def __init__(self, game: Connect4) -> None:
-        """ 
+        """
         Initialize a local player.
 
         Parameters:
@@ -28,7 +28,7 @@ class Player_Local(Player):
         return self.icon
 
     def is_my_turn(self) -> bool:
-        """ 
+        """
         Check if it is the player's turn.
 
         Returns:
@@ -47,7 +47,7 @@ class Player_Local(Player):
         return self.game.get_status()
 
     def make_move(self) -> int:
-        """ 
+        """
         Prompt the player to enter a move via the console.
 
         Returns:
@@ -64,14 +64,16 @@ class Player_Local(Player):
             except ValueError:
                 print("Please enter a valid number.")
 
-    def visualize(self) -> None:
+    def visualize(self):
         """
-        Visualize the current state of the Connect 4 board by printing it to the console.
+        Print the current game board.
         """
+
+        print("\nCurrent board:")
         board = self.game.get_board()
-        for row in board:
-            print("|".join(row))
-        print("-" * (2 * len(board[0]) - 1))
+        for row in range(7):
+            print("|".join(board[row * 8:(row + 1) * 8]))
+        print()
 
     def celebrate_win(self) -> None:
         """
