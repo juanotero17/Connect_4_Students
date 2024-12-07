@@ -1,5 +1,4 @@
 import requests
-from player_raspi_remote import Player_Raspi_Remote
 
 
 class Coordinator_Raspi_Remote:
