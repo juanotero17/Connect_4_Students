@@ -19,19 +19,16 @@ class Player_Remote(Player):
         super().__init__()
         self.server_url = server_url
 
-    def register_in_game(self) -> str:
-        """
-        Register the player on the server and assign an icon.
-
-        Returns:
-            str: The player's icon.
-        """
-        response = requests.post(f"{self.server_url}/connect4/register", json={"player_id": str(self.id)})
-        if response.status_code == 200:
-            self.icon = response.json()["player_icon"]
-            return self.icon
-        else:
-            raise Exception(f"Failed to register player: {response.text}")
+    def register_in_game(self):
+        print("Attempting to register player...")
+        response = requests.post(
+            f"{self.server_url}/connect4/register",
+            json={"player_id": self.id},  # JSON payload with player ID
+        )
+        print(f"Server response: {response.status_code} - {response.text}")
+        response.raise_for_status()
+        self.icon = response.json()["player_icon"]
+        print(f"Player registered with icon: {self.icon}")
 
     def is_my_turn(self) -> bool:
         """

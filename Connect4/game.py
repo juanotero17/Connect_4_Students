@@ -68,14 +68,15 @@ class Connect4:
             return icon
         return None
 
-    def get_board(self) -> np.ndarray:
+    def get_board(self):
         """
-        Return the current board state as a 2D array.
-
-        Returns:
-            np.ndarray: The game board.
+        Returns the current board state as a flat list for easier JSON serialization.
         """
-        return self.board
+        try:
+            return [cell or " " for row in self.board for cell in row]  # Flatten the board
+        except Exception as e:
+            print(f"Error in Connect4.get_board: {e}")  # Debugging output
+            raise
 
     def check_move(self, column: int, player_id: uuid.UUID) -> bool:
         """

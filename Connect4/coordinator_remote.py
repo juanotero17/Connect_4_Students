@@ -1,88 +1,41 @@
 import requests
 import uuid
 
-class Connect4:
-    """
-    Connect4 game logic.
-    This class is typically used on the server to manage the game state.
-    """
-
-    def __init__(self):
-        # Initialize the board as a 7x8 grid
-        self.board = [["" for _ in range(8)] for _ in range(7)]
-        self.players = {}
-        self.active_player = None
-        self.turn_number = -1
-        self.winner = None
-
-    def get_status(self):
-        return {
-            "active_player": self.active_player,
-            "active_id": self.players.get(self.active_player, {}).get("id"),
-            "winner": self.winner,
-            "turn_number": self.turn_number
-        }
-
-    def register_player(self, player_id):
-        if len(self.players) >= 2:
-            raise ValueError("Game already has two players.")
-        icon = "X" if len(self.players) == 0 else "O"
-        self.players[player_id] = {"icon": icon}
-        if self.active_player is None:
-            self.active_player = player_id
-        self.turn_number = 0
-        return icon
-
-    def get_board(self):
-        return [item for row in self.board for item in row]
-
-    def check_move(self, column, player_id):
-        if player_id != self.active_player:
-            raise ValueError("Not this player's turn.")
-        for row in reversed(self.board):
-            if row[column] == "":
-                row[column] = self.players[player_id]["icon"]
-                self.turn_number += 1
-                self._update_status()
-                return True
-        raise ValueError("Column is full.")
-
-    def _update_status(self):
-        self.active_player = next(
-            (p for p in self.players if p != self.active_player), None
-        )
-        self.winner = self._detect_win()
-
-    def _detect_win(self):
-        # Simplified win detection logic
-        for row in self.board:
-            for i in range(len(row) - 3):
-                if row[i] and row[i:i+4] == [row[i]] * 4:
-                    return self.players[self.active_player]["icon"]
-        return None
-
-
 class Player_Remote:
     """
     A remote player that interacts with a Connect4 server via REST API.
     """
 
     def __init__(self, server_url):
+        """
+        Initialize a remote player.
+        Parameters:
+            server_url (str): The base URL of the Connect4 server.
+        """
         self.server_url = server_url
-        self.id = str(uuid.uuid4())
-        self.icon = None
+        self.id = str(uuid.uuid4())  # Generate a unique ID for the player
+        self.icon = None  # Will be assigned after registration
 
     def register_in_game(self):
+        """
+        Register the player on the server and get the assigned icon.
+        """
         print("Attempting to register player...")
         response = requests.post(
-            f"{self.server_url}/connect4/register", json={"player_id": self.id}
+            f"{self.server_url}/connect4/register",
+            json={"player_id": self.id},
         )
         print(f"Server response: {response.status_code} - {response.text}")
         response.raise_for_status()
         self.icon = response.json()["player_icon"]
-        print(f"Player registered with icon: {self.icon}")
+        print(f"Player registered successfully with icon: {self.icon}")
 
     def get_game_status(self):
+        """
+        Query the server for the current game status.
+        Returns:
+            dict: The current game status.
+        """
         print("Querying server for game status...")
         response = requests.get(f"{self.server_url}/connect4/status")
         print(f"Server response: {response.status_code} - {response.text}")
@@ -90,7 +43,11 @@ class Player_Remote:
         return response.json()
 
     def make_move(self):
-        column = int(input("Enter the column number (0-7): "))
+        """
+        Prompt the player to enter a column and send the move to the server.
+        """
+        column = int(input("Enter the column number (1-8): "))
+        column -= 1
         response = requests.post(
             f"{self.server_url}/connect4/check_move",
             json={"column": column, "player_id": self.id},
@@ -99,31 +56,45 @@ class Player_Remote:
         response.raise_for_status()
 
     def visualize(self):
+        """
+        Fetch and print the current game board.
+        """
         print("Fetching current board...")
         response = requests.get(f"{self.server_url}/connect4/board")
         response.raise_for_status()
-        board = response.json()
+        board = response.json()["board"]
         for i in range(0, len(board), 8):
             print(" | ".join(board[i:i+8]))
         print()
 
     def celebrate_win(self):
+        """
+        Display a win celebration message for the player.
+        """
         print("Congratulations, you win!")
 
 
 class Coordinator_Remote:
     """
-    Coordinator for Remote Players.
-
-    Manages the game flow for remote players interacting with a server via REST API.
+    Coordinates a remote player interacting with the Connect4 server.
     """
 
     def __init__(self, server_url):
+        """
+        Initialize the coordinator with the server URL.
+        Parameters:
+            server_url (str): The base URL of the Connect4 server.
+        """
         self.server_url = server_url
         self.player = Player_Remote(self.server_url)
 
     def play(self):
+        """
+        Main function to manage the game flow for the remote player.
+        """
         print("Starting remote game...")
+
+        # Register the player
         print("Registering player...")
         try:
             self.player.register_in_game()
@@ -132,6 +103,7 @@ class Coordinator_Remote:
             print(f"Error during player registration: {e}")
             return
 
+        # Main game loop
         while True:
             print("Fetching game status...")
             try:
@@ -158,6 +130,12 @@ class Coordinator_Remote:
 
 
 if __name__ == "__main__":
+    # Ask for the server URL
     server_url = input("Enter the server URL (e.g., http://127.0.0.1:5000): ")
+    # Add protocol if missing
+    if not server_url.startswith("http://") and not server_url.startswith("https://"):
+        server_url = f"http://{server_url}"
+
+    # Start the coordinator
     coordinator = Coordinator_Remote(server_url)
     coordinator.play()
