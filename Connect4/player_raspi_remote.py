@@ -121,6 +121,8 @@ class Player_Raspi_Remote(Player):
             board (list): A flat list representing the game board state.
         """
         matrix = []
+
+        # Map each cell in the board to RGB colors
         for cell in board:
             if cell == "X":
                 matrix.append([255, 0, 0])  # Red for player X
@@ -128,4 +130,9 @@ class Player_Raspi_Remote(Player):
                 matrix.append([0, 0, 255])  # Blue for player O
             else:
                 matrix.append([0, 0, 0])  # Black for empty
+
+        # Add padding to make it 64 elements (8x8)
+        while len(matrix) < 64:
+            matrix.append([0, 0, 0])  # Add black pixels to fill
+
         self.sense.set_pixels(matrix)
