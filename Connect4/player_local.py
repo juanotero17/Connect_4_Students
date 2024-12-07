@@ -1,5 +1,3 @@
-
-
 from game import Connect4
 from player import Player
 
@@ -9,20 +7,15 @@ class Player_Local(Player):
     Local Player (uses Methods of the Game directly).
     """
 
-    def __init__(self, game:Connect4) -> None:
+    def __init__(self, game: Connect4) -> None:
         """ 
         Initialize a local player.
-            Must Implement all Methods from Abstract Player Class
 
         Parameters:
-            game (Connect4): Instance of Connect4 game
-        
-       
+            game (Connect4): Instance of Connect4 game.
         """
         super().__init__()  # Initialize id and icon from the abstract Player class
-
-       # TODO
-        raise NotImplementedError(f"You need to write this code first")
+        self.game = game
 
     def register_in_game(self) -> str:
         """
@@ -31,8 +24,8 @@ class Player_Local(Player):
         Returns:
             str: The player's icon.
         """
-        # TODO
-        raise NotImplementedError(f"You need to write this code first")
+        self.icon = self.game.register_player(self.id)
+        return self.icon
 
     def is_my_turn(self) -> bool:
         """ 
@@ -41,41 +34,47 @@ class Player_Local(Player):
         Returns:
             bool: True if it's the player's turn, False otherwise.
         """
-        # TODO
-        raise NotImplementedError(f"You need to write this code first")
+        game_status = self.game.get_status()
+        return game_status["active_player"] == self.id
 
     def get_game_status(self):
         """
-        Get the game's current status.
-            - who is the active player?
-            - is there a winner? if so who?
-            - what turn is it?
-      
+        Get the game status.
+
+        Returns:
+            dict: Contains active player, winner, and turn number.
         """
-        # TODO
-        raise NotImplementedError(f"You need to write this code first")
+        return self.game.get_status()
 
     def make_move(self) -> int:
         """ 
-        Prompt the physical player to enter a move via the console.
+        Prompt the player to enter a move via the console.
 
         Returns:
             int: The column chosen by the player for the move.
         """
-        # TODO
-        raise NotImplementedError(f"You need to write this code first")
+        while True:
+            try:
+                column = int(input(f"Player {self.icon}, enter your move (1-8): "))
+                column -= 1
+                if self.game.check_move(column, self.id):
+                    return column
+                else:
+                    print("Invalid move. Try again.")
+            except ValueError:
+                print("Please enter a valid number.")
 
     def visualize(self) -> None:
         """
         Visualize the current state of the Connect 4 board by printing it to the console.
         """
-        # TODO
-        raise NotImplementedError(f"You need to write this code first")
-
+        board = self.game.get_board()
+        for row in board:
+            print("|".join(row))
+        print("-" * (2 * len(board[0]) - 1))
 
     def celebrate_win(self) -> None:
         """
-        Celebration of Local CLI Player
+        Celebrate the player's win.
         """
-        # TODO
-        raise NotImplementedError(f"You need to write this code first")
+        print(f"Congratulations! Player {self.icon} wins!")
