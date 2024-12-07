@@ -1,4 +1,3 @@
-import uuid
 import socket  # To get the local IP
 from flask import Flask, request, jsonify  # For API
 from flask_swagger_ui import get_swaggerui_blueprint  # For Swagger documentation

@@ -1,94 +1,94 @@
 import requests
 from player import Player
 
+
 class Player_Remote(Player):
     """
-    Remote Player class interacts with the Connect4 game server.
-
-    Attributes:
-        server_url (str): The base URL of the game server.
+    A remote player that interacts with a Connect4 server via REST API.
     """
 
-    def __init__(self, server_url: str) -> None:
-        """
-        Initialize a remote player.
-
-        Parameters:
-            server_url (str): URL of the Connect4 server.
-        """
-        super().__init__()
+    def __init__(self, server_url):
+        super().__init__()  # Initialize from the abstract Player class
         self.server_url = server_url
 
     def register_in_game(self):
+        """
+        Register the player on the server and get the assigned icon.
+
+        Returns:
+            str: The player's icon.
+        """
         print("Attempting to register player...")
         response = requests.post(
             f"{self.server_url}/connect4/register",
-            json={"player_id": self.id},  # JSON payload with player ID
+            json={"player_id": str(self.id)},
         )
-        print(f"Server response: {response.status_code} - {response.text}")
         response.raise_for_status()
         self.icon = response.json()["player_icon"]
-        print(f"Player registered with icon: {self.icon}")
+        print(f"Player registered successfully with icon: {self.icon}")
+        return self.icon
 
-    def is_my_turn(self) -> bool:
+    def is_my_turn(self):
         """
-        Check if it is the player's turn by querying the server.
+        Check if it is this player's turn.
 
         Returns:
-            bool: True if it is the player's turn, False otherwise.
+            bool: True if it's the player's turn, False otherwise.
         """
-        response = requests.get(f"{self.server_url}/connect4/status")
-        if response.status_code == 200:
-            return response.json()["active_player"] == str(self.id)
-        else:
-            raise Exception(f"Failed to get game status: {response.text}")
+        status = self.get_game_status()
+        return status["active_player"] == str(self.id)
 
     def get_game_status(self):
         """
-        Get the game's current status by querying the server.
+        Get the game's current status.
 
         Returns:
-            dict: The game status.
+            dict: The current game status from the server.
         """
         response = requests.get(f"{self.server_url}/connect4/status")
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"Failed to get game status: {response.text}")
+        response.raise_for_status()
+        status = response.json()
+        return status
 
-    def make_move(self) -> int:
+    def make_move(self):
         """
-        Prompt the player to choose a move and send it to the server.
+        Prompt the player to make a move and send it to the server.
 
         Returns:
-            int: The column chosen for the move.
+            int: The column chosen by the player for the move.
         """
         while True:
             try:
-                column = int(input(f"Player {self.icon}, enter your move (0-7): "))
-                response = requests.post(f"{self.server_url}/connect4/check_move", json={"player_id": str(self.id), "column": column})
-                if response.status_code == 200:
+                column = int(input("Enter the column number (1-8): ")) - 1
+                if 0 <= column < self.board_width:
+                    response = requests.post(
+                        f"{self.server_url}/connect4/check_move",
+                        json={"column": column, "player_id": str(self.id)},
+                    )
+                    response.raise_for_status()
+                    print(f"Move successful: Column {column + 1}")
                     return column
                 else:
-                    print(f"Invalid move: {response.json().get('error', 'Unknown error')}")
+                    print(f"Column must be between 1 and {self.board_width}.")
             except ValueError:
-                print("Please enter a valid number.")
+                print("Invalid input. Please enter a number between 1 and 8.")
+            except requests.exceptions.RequestException as e:
+                print(f"Error sending move: {e}")
 
-    def visualize(self) -> None:
+    def visualize(self):
         """
-        Visualize the current state of the Connect4 board by querying the server.
+        Fetch and print the current game board.
         """
         response = requests.get(f"{self.server_url}/connect4/board")
-        if response.status_code == 200:
-            board = response.json()["board"]
-            for row in range(7):
-                print("|".join(board[row * 8:(row + 1) * 8]))
-            print("-" * 15)
-        else:
-            raise Exception(f"Failed to get board: {response.text}")
+        response.raise_for_status()
+        board = response.json()["board"]
+        print("Current Board:")
+        for i in range(0, len(board), self.board_width):
+            print(" | ".join(board[i:i + self.board_width]))
+        print()
 
-    def celebrate_win(self) -> None:
+    def celebrate_win(self):
         """
-        Celebrate the player's win.
+        Display a win celebration message for the player.
         """
         print(f"Congratulations! Player {self.icon} wins!")
