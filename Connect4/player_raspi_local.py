@@ -26,7 +26,7 @@ class Player_Raspi_Local:
         Use the joystick to select a column and make a move.
         """
         column = 0  # Start with the first column
-        self.visualize_selection(column)
+        self.visualize_selection(column)  # Highlight the column selection
 
         while True:
             for event in self.sense.stick.get_events():
@@ -38,8 +38,8 @@ class Player_Raspi_Local:
                     elif event.direction == "middle":
                         # Attempt to make a move
                         if self.game.check_move(column, self.id):
-                            self.visualize()  # Refresh the board after a successful move
-                            return  # Exit after making a move
+                            self.visualize()  # Refresh the board after the move
+                            return  # Exit after a successful move
                         else:
                             self.sense.show_message("Invalid move!", text_colour=[255, 0, 0])
 
@@ -50,7 +50,8 @@ class Player_Raspi_Local:
         """
         Highlight the selected column on the Sense HAT.
         """
-        pixels = [[0, 0, 0] for _ in range(64)]  # Initialize all LEDs to black
+        # Create a blank 8x8 grid
+        pixels = [[0, 0, 0] for _ in range(64)]
 
         # Highlight the top row of the selected column
         for row in range(8):
@@ -60,25 +61,27 @@ class Player_Raspi_Local:
 
     def visualize(self):
         """
-        Display the game board on the Sense HAT LED matrix.
+        Display the current game board on the Sense HAT LED matrix.
         """
         board = self.game.get_board()  # Get the board as a flat list (56 elements)
-        print(f"Debug: Board state: {board}")  # Debug: Print the board state
 
+        # Initialize a pixel list for the 8x8 grid
         pixels = []
+
+        # Map each cell in the board to a color
         for cell in board:
             if cell == "X":
-                pixels.append([255, 0, 0])  # Red for X
+                pixels.append([255, 0, 0])  # Red for Player X
             elif cell == "O":
-                pixels.append([0, 0, 255])  # Blue for O
+                pixels.append([0, 0, 255])  # Blue for Player O
             else:
                 pixels.append([0, 0, 0])  # Black for empty cells
 
-        # Add a blank row at the bottom to make it 8x8
+        # Pad the board to 64 pixels to fit the Sense HAT's 8x8 grid
         while len(pixels) < 64:
-            pixels.append([0, 0, 0])
+            pixels.append([0, 0, 0])  # Add blank pixels for padding
 
-        print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debug
+        # Send the pixel list to the Sense HAT
         self.sense.set_pixels(pixels)
 
     def celebrate_win(self):

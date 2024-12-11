@@ -48,7 +48,7 @@ class Coordinator_Raspi_Local:
             )
 
             # Visualize the board and prompt the player to make a move
-            current_player.visualize()
+            current_player.visualize()  # Show the updated board
             current_player.make_move()
 
 
