@@ -1,8 +1,9 @@
 from sense_hat import SenseHat
 from game import Connect4
+from player import Player
 import time
 
-class Player_Raspi_Local:
+class Player_Raspi_Local(Player):
     """
     A local player for Raspberry Pi using Sense HAT for input and output.
     """
@@ -11,6 +12,7 @@ class Player_Raspi_Local:
         """
         Initialize a local player using Sense HAT.
         """
+        super().__init__()  # Initialize the abstract Player class
         self.game = game
         self.id = id
         self.sense = sense
@@ -23,6 +25,26 @@ class Player_Raspi_Local:
             print(f"Debug: Sense HAT initialized and cleared for Player {self.icon}.")
         except Exception as e:
             print(f"Error: Could not initialize Sense HAT. {e}")
+
+    def register_in_game(self):
+        """
+        Register the player in the game and assign the player an icon.
+        """
+        self.icon = self.game.register_player(self.id)
+        return self.icon
+
+    def is_my_turn(self):
+        """
+        Check if it is the player's turn.
+        """
+        return self.game.get_status()["active_player"] == self.id
+
+    def get_game_status(self):
+        """
+        Get the game's current status.
+        """
+        status = self.game.get_status()
+        return (status["active_player"], status["winner"], status["turn_number"])
 
     def make_move(self):
         """
