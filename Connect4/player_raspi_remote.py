@@ -89,12 +89,11 @@ class Player_Raspi_Remote(Player):
                 time.sleep(0.2)
 
     def visualize(self, selected_column=None):
-        """
-        Display the current game board and highlight the selected column on the Sense HAT.
-        """
         response = requests.get(f"{self.server_url}/connect4/board")
         response.raise_for_status()
         board = response.json()["board"]
+
+        print(f"Debug: Retrieved board state: {board}")  # Debug fetched board state
 
         pixels = [[0, 0, 0] for _ in range(64)]  # Initialize an 8x8 grid
 
@@ -115,7 +114,7 @@ class Player_Raspi_Remote(Player):
 
         try:
             self.sense.set_pixels(pixels)
-            time.sleep(0.1)
+            print(f"Debug: Updated Sense HAT display with board state.")  # Debug confirmation
         except Exception as e:
             print(f"Error: Failed to update Sense HAT. {e}")
 

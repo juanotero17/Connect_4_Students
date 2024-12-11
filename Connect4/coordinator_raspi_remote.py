@@ -1,5 +1,5 @@
 from player_raspi_remote import Player_Raspi_Remote
-
+import time
 class Coordinator_Raspi_Remote:
     """
     Coordinates a remote Sense HAT player interacting with the Connect4 server.
@@ -10,9 +10,6 @@ class Coordinator_Raspi_Remote:
         self.player = Player_Raspi_Remote(server_url)
 
     def play(self):
-        """
-        Main game loop for the Sense HAT player.
-        """
         print("Starting remote game on Sense HAT...")
         try:
             self.player.register_in_game()
@@ -24,6 +21,8 @@ class Coordinator_Raspi_Remote:
         while True:
             try:
                 status = self.player.get_game_status()
+                print(f"Debug: Game status: {status}")  # Debugging game status
+
                 if status["winner"]:
                     if status["winner"] == self.player.icon:
                         self.player.celebrate_win()
@@ -31,12 +30,14 @@ class Coordinator_Raspi_Remote:
                         print(f"Player {status['winner']} wins!")
                     break
 
-                if status["active_player"] == self.player.id:
+                if status["active_player"] == str(self.player.id):
                     print("It's your turn!")
                     self.player.visualize()
                     self.player.make_move()
                 else:
                     print("Waiting for the other player...")
+                    time.sleep(2)  # Add a small delay to avoid constant polling
+
             except Exception as e:
                 print(f"Error during game loop: {e}")
                 break
