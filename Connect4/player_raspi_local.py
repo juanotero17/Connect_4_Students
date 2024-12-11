@@ -29,7 +29,7 @@ class Player_Raspi_Local:
         Use the joystick to select a column and make a move.
         """
         column = 0  # Start with the first column
-        self.visualize_selection(column)  # Highlight the column selection
+        self.visualize(column)  # Display the grid with the movement dot
 
         while True:
             for event in self.sense.stick.get_events():
@@ -48,28 +48,12 @@ class Player_Raspi_Local:
                         else:
                             self.sense.show_message("Invalid move!", text_colour=[255, 0, 0])
 
-                    # Update the selection highlight
-                    self.visualize_selection(column)
+                    # Update the grid with the movement dot
+                    self.visualize(column)
 
-    def visualize_selection(self, column):
+    def visualize(self, selected_column=None):
         """
-        Highlight the selected column on the Sense HAT.
-        """
-        # Create a blank 8x8 grid
-        pixels = [[0, 0, 0] for _ in range(64)]
-
-        # Highlight the top row of the selected column
-        for row in range(8):
-            pixels[column + row * 8] = [255, 255, 255]  # White for selection
-
-        try:
-            self.sense.set_pixels(pixels)
-        except Exception as e:
-            print(f"Error: Failed to set pixels for selection. {e}")
-
-    def visualize(self):
-        """
-        Display the current game board on the Sense HAT LED matrix.
+        Display the current game board and optionally highlight the selected column on the Sense HAT LED matrix.
         """
         board = self.game.get_board()  # Fetch the board as a flat list (56 elements)
         print(f"Debug: Board state (flat list): {board}")  # Debugging board state
@@ -88,6 +72,10 @@ class Player_Raspi_Local:
         # Add a blank row to make it 8x8
         while len(pixels) < 64:
             pixels.append([0, 0, 0])
+
+        # Highlight the selected column with a dot at the top row
+        if selected_column is not None:
+            pixels[selected_column] = [255, 255, 255]  # White dot for selection
 
         print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
 
