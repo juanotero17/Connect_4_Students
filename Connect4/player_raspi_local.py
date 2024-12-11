@@ -36,9 +36,10 @@ class Player_Raspi_Local:
                     elif event.direction == "right" and column < 7:
                         column += 1
                     elif event.direction == "middle":
-                        # Attempt to make a move in the selected column
+                        # Attempt to make a move
                         if self.game.check_move(column, self.id):
-                            return  # Move was successful
+                            self.visualize()  # Refresh the board after a successful move
+                            return  # Exit after making a move
                         else:
                             self.sense.show_message("Invalid move!", text_colour=[255, 0, 0])
 
@@ -59,12 +60,12 @@ class Player_Raspi_Local:
 
     def visualize(self):
         """
-        Display the game board on the Sense HAT LED matrix with proper mapping.
+        Display the game board on the Sense HAT LED matrix.
         """
         board = self.game.get_board()  # Get the board as a flat list (56 elements)
-        pixels = []
+        print(f"Debug: Board state: {board}")  # Debug: Print the board state
 
-        # Map each cell in the board to a color
+        pixels = []
         for cell in board:
             if cell == "X":
                 pixels.append([255, 0, 0])  # Red for X
@@ -74,10 +75,10 @@ class Player_Raspi_Local:
                 pixels.append([0, 0, 0])  # Black for empty cells
 
         # Add a blank row at the bottom to make it 8x8
-        for _ in range(8):
+        while len(pixels) < 64:
             pixels.append([0, 0, 0])
 
-        # Update the Sense HAT LED matrix
+        print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debug
         self.sense.set_pixels(pixels)
 
     def celebrate_win(self):

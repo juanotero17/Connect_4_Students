@@ -81,21 +81,18 @@ class Connect4:
     def check_move(self, column: int, player_id: uuid.UUID) -> bool:
         """
         Check if a move is legal, and make the move if valid.
-
-        Parameters:
-            column (int): The selected column for the move.
-            player_id (UUID): The ID of the player making the move.
-
-        Returns:
-            bool: True if the move was successful, False otherwise.
         """
+        print(f"Debug: Player {player_id} attempting move in column {column}")  # Debug
         if self.winner:
+            print("Debug: Game already has a winner.")  # Debug
             return False  # Game already won
 
         if player_id != self.active_player:
+            print("Debug: Not this player's turn.")  # Debug
             return False  # Not the player's turn
 
         if column < 0 or column >= self.board.shape[1]:
+            print("Debug: Invalid column.")  # Debug
             return False  # Invalid column
 
         for row in range(self.board.shape[0] - 1, -1, -1):
@@ -103,8 +100,10 @@ class Connect4:
                 self.board[row, column] = self.players[player_id]
                 self.turn_number += 1
                 self.__update_status()
+                print(f"Debug: Board updated:\n{self.board}")  # Debug
                 return True
 
+        print("Debug: Column is full.")  # Debug
         return False  # Column full
 
     def __update_status(self):
