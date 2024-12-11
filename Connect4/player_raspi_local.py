@@ -70,7 +70,7 @@ class Player_Raspi_Local:
             pixels[selected_column] = [255, 255, 255]  # White dot for selection
 
         # Map each cell in the board to the grid, starting from row 0
-        for row in range(7):  # Start from the top row (row 0)
+        for row in range(8):  # Start from the top row (row 0)
             for col in range(8):
                 cell_index = row * 8 + col
                 if board[cell_index] == "X":
