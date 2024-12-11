@@ -63,11 +63,11 @@ class Player_Raspi_Local:
 
         pixels = [[0, 0, 0] for _ in range(64)]  # Initialize the 8x8 grid
 
-        # Highlight the selected column with a dot at the top row
+        # Highlight the selected column with a dot at the bottom row
         if selected_column is not None:
             for col in range(8):
-                pixels[col] = [0, 0, 0]  # Clear any existing indicator
-            pixels[selected_column] = [255, 255, 255]  # White dot for selection
+                pixels[56 + col] = [0, 0, 0]  # Clear any existing indicator
+            pixels[56 + selected_column] = [255, 255, 255]  # White dot for selection
 
         # Map each cell in the board to the grid, starting from the bottom row
         for row in range(7):
