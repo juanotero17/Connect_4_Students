@@ -7,19 +7,22 @@ class Player_Raspi_Local:
     A local player for Raspberry Pi using Sense HAT for input and output.
     """
 
-    def __init__(self, game: Connect4, id, sense: SenseHat):
+    def __init__(self, game, id, sense):
         """
-        Initialize the player.
-        Parameters:
-            game (Connect4): The game instance.
-            id (UUID): The player's unique ID.
-            sense (SenseHat): The shared Sense HAT instance.
+        Initialize a local player using Sense HAT.
         """
         self.game = game
         self.id = id
         self.sense = sense
         self.icon = self.game.register_player(self.id)
         self.color = [255, 0, 0] if self.icon == "X" else [0, 0, 255]
+
+        # Debug Sense HAT initialization
+        try:
+            self.sense.clear()
+            print(f"Debug: Sense HAT initialized for Player {self.icon}.")
+        except Exception as e:
+            print(f"Error: Could not initialize Sense HAT. {e}")
 
     def make_move(self):
         """
@@ -30,6 +33,7 @@ class Player_Raspi_Local:
 
         while True:
             for event in self.sense.stick.get_events():
+                print(f"Debug: Joystick event: {event}")  # Debug joystick events
                 if event.action == "pressed":
                     if event.direction == "left" and column > 0:
                         column -= 1
@@ -38,6 +42,7 @@ class Player_Raspi_Local:
                     elif event.direction == "middle":
                         # Attempt to make a move
                         if self.game.check_move(column, self.id):
+                            print(f"Debug: Player {self.icon} made a move in column {column}.")
                             self.visualize()  # Refresh the board after the move
                             return  # Exit after a successful move
                         else:
@@ -63,12 +68,14 @@ class Player_Raspi_Local:
         """
         Display the current game board on the Sense HAT LED matrix.
         """
-        board = self.game.get_board()  # Get the board as a flat list (56 elements)
+        # Get the board as a flat list
+        board = self.game.get_board()
+        print(f"Debug: Board state (flat list): {board}")  # Debugging board state
 
         # Initialize a pixel list for the 8x8 grid
         pixels = []
 
-        # Map each cell in the board to a color
+        # Map the 7x8 board to colors
         for cell in board:
             if cell == "X":
                 pixels.append([255, 0, 0])  # Red for Player X
@@ -77,12 +84,19 @@ class Player_Raspi_Local:
             else:
                 pixels.append([0, 0, 0])  # Black for empty cells
 
-        # Pad the board to 64 pixels to fit the Sense HAT's 8x8 grid
+        # Pad to 64 elements (8x8 grid)
         while len(pixels) < 64:
-            pixels.append([0, 0, 0])  # Add blank pixels for padding
+            pixels.append([0, 0, 0])
 
-        # Send the pixel list to the Sense HAT
-        self.sense.set_pixels(pixels)
+        # Debug the pixel list sent to the Sense HAT
+        print(f"Debug: Pixels sent to Sense HAT: {pixels}")
+
+        # Update the Sense HAT LED matrix
+        try:
+            self.sense.set_pixels(pixels)
+            print("Debug: Board updated on Sense HAT.")  # Confirmation
+        except Exception as e:
+            print(f"Error: Failed to update Sense HAT. {e}")
 
     def celebrate_win(self):
         """
