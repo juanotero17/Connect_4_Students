@@ -74,9 +74,9 @@ class Player_Raspi_Local:
             for col in range(8):
                 cell_index = row * 8 + col
                 if board[cell_index] == "X":
-                    pixels[(7 - row) * 8 + col + 8] = [255, 0, 0]  # Red for Player X
+                    pixels[(7 - row) * 8 + col] = [255, 0, 0]  # Red for Player X
                 elif board[cell_index] == "O":
-                    pixels[(7 - row) * 8 + col + 8] = [0, 0, 255]  # Blue for Player O
+                    pixels[(7 - row) * 8 + col] = [0, 0, 255]  # Blue for Player O
 
         print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
 
