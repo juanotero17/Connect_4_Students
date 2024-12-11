@@ -51,6 +51,9 @@ class Player_Raspi_Local:
                     # Update the grid with the movement dot
                     self.visualize(column)
 
+                # Small debounce delay to prevent rapid movement
+                time.sleep(0.2)
+
     def visualize(self, selected_column=None):
         """
         Display the current game board and optionally highlight the selected column on the Sense HAT LED matrix.
@@ -58,24 +61,20 @@ class Player_Raspi_Local:
         board = self.game.get_board()  # Fetch the board as a flat list (56 elements)
         print(f"Debug: Board state (flat list): {board}")  # Debugging board state
 
-        pixels = []
+        pixels = [[0, 0, 0] for _ in range(64)]  # Initialize the 8x8 grid
 
-        # Map each cell in the board to a color
-        for cell in board:
-            if cell == "X":
-                pixels.append([255, 0, 0])  # Red for Player X
-            elif cell == "O":
-                pixels.append([0, 0, 255])  # Blue for Player O
-            else:
-                pixels.append([0, 0, 0])  # Black for empty cells
+        # Map each cell in the board to the grid, starting from the bottom row
+        for row in range(7):
+            for col in range(8):
+                cell_index = row * 8 + col
+                if board[cell_index] == "X":
+                    pixels[(6 - row) * 8 + col] = [255, 0, 0]  # Red for Player X
+                elif board[cell_index] == "O":
+                    pixels[(6 - row) * 8 + col] = [0, 0, 255]  # Blue for Player O
 
-        # Add a blank row to make it 8x8
-        while len(pixels) < 64:
-            pixels.append([0, 0, 0])
-
-        # Highlight the selected column with a dot at the top row
+        # Highlight the selected column with a dot at the bottom row
         if selected_column is not None:
-            pixels[selected_column] = [255, 255, 255]  # White dot for selection
+            pixels[56 + selected_column] = [255, 255, 255]  # White dot for selection
 
         print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
 
