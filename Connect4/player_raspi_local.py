@@ -69,14 +69,14 @@ class Player_Raspi_Local:
                 pixels[col] = [0, 0, 0]  # Clear any existing indicator
             pixels[selected_column] = [255, 255, 255]  # White dot for selection
 
-        # Map each cell in the board to the grid, starting from the bottom row (row 7)
-        for row in range(6, -1, -1):  # Start from the bottom row
+        # Map each cell in the board to the grid, starting from row 0
+        for row in range(7):  # Start from the top row (row 0)
             for col in range(8):
                 cell_index = row * 8 + col
                 if board[cell_index] == "X":
-                    pixels[(7 - row) * 8 + col] = [255, 0, 0]  # Red for Player X
+                    pixels[row * 8 + col] = [255, 0, 0]  # Red for Player X
                 elif board[cell_index] == "O":
-                    pixels[(7 - row) * 8 + col] = [0, 0, 255]  # Blue for Player O
+                    pixels[row * 8 + col] = [0, 0, 255]  # Blue for Player O
 
         print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
 
