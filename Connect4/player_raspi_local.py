@@ -54,11 +54,12 @@ class Player_Raspi_Local:
 
     def visualize(self):
         """
-        Display the game board on the Sense HAT.
+        Display the game board on the Sense HAT LED matrix with column numbers.
         """
         board = self.game.get_board()  # Fetch the board state as a flat list
         pixels = []
 
+        # Map the board to LED colors
         for cell in board:
             if cell == "X":
                 pixels.append([255, 0, 0])  # Red for X
@@ -66,6 +67,10 @@ class Player_Raspi_Local:
                 pixels.append([0, 0, 255])  # Blue for O
             else:
                 pixels.append([0, 0, 0])  # Black for empty cells
+
+        # Add column numbers as the last row
+        for col in range(8):
+            pixels.append([255, 255, 255])  # White for column numbers
 
         self.sense.set_pixels(pixels)
 
