@@ -63,18 +63,18 @@ class Player_Raspi_Local:
 
         pixels = [[0, 0, 0] for _ in range(64)]  # Initialize the 8x8 grid
 
-        # Map each cell in the board to the grid, starting from the bottom row
+        # Map each cell in the board to the grid, rotated 180 degrees
         for row in range(7):
             for col in range(8):
                 cell_index = row * 8 + col
                 if board[cell_index] == "X":
-                    pixels[(6 - row) * 8 + col] = [255, 0, 0]  # Red for Player X
+                    pixels[(row) * 8 + (7 - col)] = [255, 0, 0]  # Red for Player X
                 elif board[cell_index] == "O":
-                    pixels[(6 - row) * 8 + col] = [0, 0, 255]  # Blue for Player O
+                    pixels[(row) * 8 + (7 - col)] = [0, 0, 255]  # Blue for Player O
 
-        # Highlight the selected column with a dot at the bottom row
+        # Highlight the selected column with a dot at the top row (rotated)
         if selected_column is not None:
-            pixels[56 + selected_column] = [255, 255, 255]  # White dot for selection
+            pixels[selected_column] = [255, 255, 255]  # White dot for selection
 
         print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
 
