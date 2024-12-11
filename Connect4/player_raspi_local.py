@@ -1,78 +1,87 @@
 import time
-
 from sense_hat import SenseHat
-
 from game import Connect4
 from player_local import Player_Local
 
 
 class Player_Raspi_Local(Player_Local):
-    """ 
-    Local Raspi Player 
-        Same as Local Player -> with some changed methods
-            (uses Methods of Game and SenseHat)
+    """
+    Local Raspi Player
+    Uses Methods of Game and SenseHat for input/output.
     """
 
-    def __init__(self, game:Connect4, **kwargs) -> None:
-        """ 
+    def __init__(self, game: Connect4, **kwargs) -> None:
+        """
         Initialize a local Raspi player with a shared SenseHat instance.
 
         Parameters:
             game (Connect4): Game instance.
             sense (SenseHat): Shared SenseHat instance for all players. (if SHARED option is used)
-        
+
         Raises:
             ValueError: If 'sense' is not provided in kwargs.
         """
         # Initialize the parent class (Player_Local)
-        super().__init__(**kwargs)
+        super().__init__(game)
 
-        # Extract the SenseHat instance from kwargs  (only if SHARED instance)
-        # Remove Otherwise
+        # Extract the SenseHat instance from kwargs
         try:
             self.sense: SenseHat = kwargs["sense"]
         except KeyError:
             raise ValueError(f"{type(self).__name__} requires a 'sense' (SenseHat instance) attribute")
 
-        # TODO: setup other Raspi stuff here
-
-    
     def register_in_game(self):
         """
         Register in game
-            Set Player Icon 
-            Set Player Color
+        Set Player Icon and Player Color.
         """
-        # first do normal register
-        self.icon = super().register_in_game()          # call method of Parent Class (Player_Local)
+        # Call the parent class method to register
+        self.icon = super().register_in_game()
 
-        # TODO: also set color of the player
+        # Assign a color based on the icon
+        self.color = [255, 0, 0] if self.icon == "X" else [0, 0, 255]
+        print(f"Player {self.icon} registered with color {self.color}!")
 
-        raise NotImplementedError(f"Override register_in_game of Player_Raspi_Locap")
-
-    
-    def visualize_choice(self, column:int)->None:
-        """ 
+    def visualize_choice(self, column: int) -> None:
+        """
         Visualize the SELECTION process of choosing a column
-            Toggles the LED on the top row of the currently selected column
+        Toggles the LED on the top row of the currently selected column.
 
         Parameters:
-            column (int):       potentially selected Column during Selection Process
+            column (int): Selected column during Selection Process.
         """
-        
+        # Create a blank matrix
+        matrix = [[0, 0, 0] for _ in range(64)]
+
+        # Highlight the selected column in white
+        for row in range(8):  # Add a vertical line for the column
+            matrix[column + row * 8] = [255, 255, 255]
+
+        self.sense.set_pixels(matrix)
 
     def visualize(self) -> None:
         """
         Override Visualization of Local Player
-            Also Visualize on the Raspi 
+        Display the board on the Sense HAT.
         """
+        state = self.game.get_game_state()
+        board = state["board"]
 
-        # TODO: visualize Board on raspi
+        # Map the board to LED colors
+        matrix = []
+        for row in board:
+            for cell in row:
+                if cell == "X":
+                    matrix.append([255, 0, 0])  # Red for X
+                elif cell == "O":
+                    matrix.append([0, 0, 255])  # Blue for O
+                else:
+                    matrix.append([0, 0, 0])  # Black for empty
+        while len(matrix) < 64:
+            matrix.append([0, 0, 0])  # Fill remaining pixels with black
 
-        # OPTIONAL: also visualize on CLI
-        super().visualize()
-
-        raise NotImplementedError(f" visualize on Raspi not yet implemented")
+        # Display on Sense HAT
+        self.sense.set_pixels(matrix)
 
     def make_move(self) -> int:
         """
@@ -80,19 +89,34 @@ class Player_Raspi_Local(Player_Local):
         Uses joystick to move left or right and select a column.
 
         Returns:
-            col (int):  Selected column (0...7)
+            int: Selected column (0...7).
         """
-        
-        raise NotImplementedError(f"make_move not yet implemented on Player_Raspi_Local")
-    
-    
+        column = 0
+        self.visualize_choice(column)
+
+        while True:
+            for event in self.sense.stick.get_events():
+                if event.action == "pressed":
+                    if event.direction == "left" and column > 0:
+                        column -= 1
+                    elif event.direction == "right" and column < 7:
+                        column += 1
+                    elif event.direction == "middle":
+                        # Validate move and return the column if valid
+                        if self.game.check_move(column, self.id):
+                            return column
+                        else:
+                            self.sense.show_message("Invalid move", text_colour=[255, 0, 0])
+                    self.visualize_choice(column)
+
     def celebrate_win(self) -> None:
         """
-        Celebrate CLI Win of Raspi player
-            Override Method of Local Player
+        Celebrate the win for the Raspberry Pi player.
         """
-        # TODO: Own Celebration Method on SenseHat
-
-        # Optional: also do CLI celebration
-        super().celebrate_win()
-
+        print(f"Player {self.icon} wins! Celebrating on Sense HAT!")
+        for _ in range(3):
+            self.sense.clear(self.color)
+            time.sleep(0.5)
+            self.sense.clear()
+            time.sleep(0.5)
+        self.sense.show_message(f"{self.icon} Wins!", text_colour=self.color)
