@@ -31,6 +31,7 @@ class Coordinator_Raspi_Local:
         while True:
             # Fetch game status
             status = self.game.get_status()
+            print(f"Debug: Game status: {status}")  # Debug game status
             winner = status["winner"]
 
             # Check if there's a winner

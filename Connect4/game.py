@@ -73,7 +73,9 @@ class Connect4:
         Returns the current board state as a flat list for easier JSON serialization.
         """
         try:
-            return [cell or " " for row in self.board for cell in row]  # Flatten the board
+            flat_board = [cell or " " for row in self.board for cell in row]  # Flatten the board
+            print(f"Debug: Flattened board: {flat_board}")  # Debug
+            return flat_board
         except Exception as e:
             print(f"Error in Connect4.get_board: {e}")  # Debugging output
             raise
@@ -99,8 +101,8 @@ class Connect4:
             if self.board[row, column] == " ":
                 self.board[row, column] = self.players[player_id]
                 self.turn_number += 1
+                print(f"Debug: Move successful. Updated board:\n{self.board}")  # Debugging board update
                 self.__update_status()
-                print(f"Debug: Board updated:\n{self.board}")  # Debug
                 return True
 
         print("Debug: Column is full.")  # Debug

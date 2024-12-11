@@ -68,14 +68,12 @@ class Player_Raspi_Local:
         """
         Display the current game board on the Sense HAT LED matrix.
         """
-        # Get the board as a flat list
-        board = self.game.get_board()
+        board = self.game.get_board()  # Fetch the board as a flat list (56 elements)
         print(f"Debug: Board state (flat list): {board}")  # Debugging board state
 
-        # Initialize a pixel list for the 8x8 grid
         pixels = []
 
-        # Map the 7x8 board to colors
+        # Map each cell in the board to a color
         for cell in board:
             if cell == "X":
                 pixels.append([255, 0, 0])  # Red for Player X
@@ -84,19 +82,12 @@ class Player_Raspi_Local:
             else:
                 pixels.append([0, 0, 0])  # Black for empty cells
 
-        # Pad to 64 elements (8x8 grid)
+        # Add a blank row to make it 8x8
         while len(pixels) < 64:
             pixels.append([0, 0, 0])
 
-        # Debug the pixel list sent to the Sense HAT
-        print(f"Debug: Pixels sent to Sense HAT: {pixels}")
-
-        # Update the Sense HAT LED matrix
-        try:
-            self.sense.set_pixels(pixels)
-            print("Debug: Board updated on Sense HAT.")  # Confirmation
-        except Exception as e:
-            print(f"Error: Failed to update Sense HAT. {e}")
+        print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
+        self.sense.set_pixels(pixels)
 
     def celebrate_win(self):
         """
