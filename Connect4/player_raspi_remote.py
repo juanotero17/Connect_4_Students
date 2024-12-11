@@ -1,6 +1,8 @@
 import requests
+import uuid
 from sense_hat import SenseHat
-from player import Player
+from player import Player  # Importing the abstract base class
+import time
 
 
 class Player_Raspi_Remote(Player):
@@ -9,16 +11,23 @@ class Player_Raspi_Remote(Player):
     """
 
     def __init__(self, server_url):
-        super().__init__()  # Initialize attributes from the abstract Player class
+        """
+        Initialize the remote Sense HAT player.
+        """
+        super().__init__()  # Initialize attributes from the abstract base class
         self.server_url = server_url
         self.sense = SenseHat()
 
+        # Initialize the Sense HAT
+        try:
+            self.sense.clear()
+            print("Debug: Sense HAT initialized.")
+        except Exception as e:
+            print(f"Error: Failed to initialize Sense HAT. {e}")
+
     def register_in_game(self):
         """
-        Register the player on the server and get the assigned icon.
-
-        Returns:
-            str: The player's icon.
+        Register the player with the server and assign an icon.
         """
         print("Registering player...")
         response = requests.post(
@@ -27,25 +36,19 @@ class Player_Raspi_Remote(Player):
         )
         response.raise_for_status()
         self.icon = response.json()["player_icon"]
-        print(f"Player registered successfully with icon: {self.icon}")
+        print(f"Player registered with icon: {self.icon}")
         return self.icon
 
     def is_my_turn(self):
         """
         Check if it is this player's turn.
-
-        Returns:
-            bool: True if it's the player's turn, False otherwise.
         """
         status = self.get_game_status()
         return status["active_player"] == str(self.id)
 
     def get_game_status(self):
         """
-        Get the game's current status.
-
-        Returns:
-            dict: The current game status from the server.
+        Retrieve the current game status from the server.
         """
         response = requests.get(f"{self.server_url}/connect4/status")
         response.raise_for_status()
@@ -53,82 +56,76 @@ class Player_Raspi_Remote(Player):
 
     def make_move(self):
         """
-        Use the Sense HAT joystick to select a column for the move.
-
-        Returns:
-            int: The column chosen by the player for the move.
+        Use the joystick to select a column and send the move to the server.
         """
-        print("Use the joystick to select your move.")
-        column = self._select_column()
-        response = requests.post(
-            f"{self.server_url}/connect4/check_move",
-            json={"column": column, "player_id": str(self.id)},
-        )
-        response.raise_for_status()
-        print(f"Move successful: Column {column + 1}")
-        return column
+        column = 0  # Start with the first column
+        self.visualize(column)  # Display the current state with selection
 
-    def visualize(self):
+        while True:
+            for event in self.sense.stick.get_events():
+                print(f"Debug: Joystick event: {event}")
+                if event.action == "pressed":
+                    if event.direction == "left" and column > 0:
+                        column -= 1
+                    elif event.direction == "right" and column < 7:
+                        column += 1
+                    elif event.direction == "middle":
+                        # Attempt to make a move on the server
+                        response = requests.post(
+                            f"{self.server_url}/connect4/check_move",
+                            json={"column": column, "player_id": str(self.id)},
+                        )
+                        if response.status_code == 200:
+                            print(f"Debug: Move successful in column {column}.")
+                            self.visualize()  # Refresh the board
+                            return
+                        else:
+                            self.sense.show_message("Invalid move!", text_colour=[255, 0, 0])
+
+                    # Update the selection highlight
+                    self.visualize(column)
+
+                # Small debounce delay to prevent rapid movement
+                time.sleep(0.2)
+
+    def visualize(self, selected_column=None):
         """
-        Display the current game board on the Sense HAT LED matrix.
+        Display the current game board and highlight the selected column on the Sense HAT.
         """
         response = requests.get(f"{self.server_url}/connect4/board")
         response.raise_for_status()
         board = response.json()["board"]
-        self._display_board(board)
+
+        pixels = [[0, 0, 0] for _ in range(64)]  # Initialize an 8x8 grid
+
+        # Highlight the selected column
+        if selected_column is not None:
+            for col in range(8):
+                pixels[col] = [0, 0, 0]
+            pixels[selected_column] = [255, 255, 255]  # White for selection
+
+        # Map the game board to the grid
+        for row in range(7):
+            for col in range(8):
+                cell_index = row * 8 + col
+                if board[cell_index] == "X":
+                    pixels[(row + 1) * 8 + col] = [255, 0, 0]  # Red for Player X
+                elif board[cell_index] == "O":
+                    pixels[(row + 1) * 8 + col] = [0, 0, 255]  # Blue for Player O
+
+        try:
+            self.sense.set_pixels(pixels)
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"Error: Failed to update Sense HAT. {e}")
 
     def celebrate_win(self):
         """
         Display a winning animation on the Sense HAT.
         """
-        print(f"Congratulations! Player {self.icon} wins!")
-        self.sense.show_message("You win!", text_colour=[0, 255, 0])
-
-    def _select_column(self):
-        """
-        Use the joystick to select a column.
-
-        Returns:
-            int: The selected column index.
-        """
-        selected = 0
-        self._display_column_selector(selected)
-        while True:
-            for event in self.sense.stick.get_events():
-                if event.action == "pressed":
-                    if event.direction == "left" and selected > 0:
-                        selected -= 1
-                    elif event.direction == "right" and selected < self.board_width - 1:
-                        selected += 1
-                    elif event.direction == "middle":
-                        return selected
-                    self._display_column_selector(selected)
-
-    def _display_column_selector(self, selected):
-        """
-        Highlight the selected column on the Sense HAT LED matrix.
-        """
-        matrix = [[0, 0, 0] for _ in range(64)]
-        for i in range(self.board_height):  # Highlight all rows in the selected column
-            matrix[selected + i * self.board_width] = [255, 255, 255]
-        self.sense.set_pixels(matrix)
-
-    def _display_board(self, board):
-        """
-        Display the game board on the Sense HAT LED matrix.
-
-        Parameters:
-            board (list): A flat list representing the game board state.
-        """
-        matrix = []
-        for cell in board:
-            if cell == "X":
-                matrix.append([255, 0, 0])
-            elif cell == "O":
-                matrix.append([0, 0, 255])
-            else:
-                matrix.append([0, 0, 0])
-        while len(matrix) < 64:
-            matrix.append([0, 0, 0])  # Add black pixels for padding
-        self.sense.set_pixels(matrix)
-
+        for _ in range(3):
+            self.sense.clear([255, 255, 0])  # Yellow flash
+            time.sleep(0.3)
+            self.sense.clear()
+            time.sleep(0.3)
+        self.sense.show_message(f"Player {self.icon} wins!", text_colour=[255, 255, 0])
