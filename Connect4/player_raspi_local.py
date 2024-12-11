@@ -1,6 +1,6 @@
 from sense_hat import SenseHat
 from game import Connect4
-
+import time
 
 class Player_Raspi_Local:
     """
@@ -19,8 +19,8 @@ class Player_Raspi_Local:
 
         # Debug Sense HAT initialization
         try:
-            self.sense.clear()
-            print(f"Debug: Sense HAT initialized for Player {self.icon}.")
+            self.sense.clear()  # Clear the Sense HAT display
+            print(f"Debug: Sense HAT initialized and cleared for Player {self.icon}.")
         except Exception as e:
             print(f"Error: Could not initialize Sense HAT. {e}")
 
@@ -62,7 +62,10 @@ class Player_Raspi_Local:
         for row in range(8):
             pixels[column + row * 8] = [255, 255, 255]  # White for selection
 
-        self.sense.set_pixels(pixels)
+        try:
+            self.sense.set_pixels(pixels)
+        except Exception as e:
+            print(f"Error: Failed to set pixels for selection. {e}")
 
     def visualize(self):
         """
@@ -87,7 +90,13 @@ class Player_Raspi_Local:
             pixels.append([0, 0, 0])
 
         print(f"Debug: Pixels sent to Sense HAT: {pixels}")  # Debugging pixel data
-        self.sense.set_pixels(pixels)
+
+        try:
+            self.sense.set_pixels(pixels)  # Send the pixels to the Sense HAT
+            time.sleep(0.1)  # Add a small delay to ensure the display updates
+            print("Debug: Board updated on Sense HAT.")  # Confirmation
+        except Exception as e:
+            print(f"Error: Failed to update Sense HAT. {e}")
 
     def celebrate_win(self):
         """
@@ -95,5 +104,7 @@ class Player_Raspi_Local:
         """
         for _ in range(3):
             self.sense.clear(self.color)
+            time.sleep(0.3)
             self.sense.clear()
+            time.sleep(0.3)
         self.sense.show_message(f"Player {self.icon} wins!", text_colour=self.color)
